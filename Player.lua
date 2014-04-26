@@ -9,6 +9,7 @@ function Player:initialize(x, y)
   for i = 0, 6 do
     self.quads[i] = love.graphics.newQuad(i * 13, 0, 13, 19, self.sprite:getWidth(), self.sprite:getHeight())
   end
+  self.canJump = true
 end
 
 function Player:update(dt)
@@ -20,7 +21,11 @@ function Player:update(dt)
     self.c:move(self.speed, 0)
   end
   if love.keyboard.isDown("w") then
-    self.c:move(0, -30)
+    if self.canJump then
+      print("jump!")
+      self.c:move(0, -30)
+      self.canJump = false
+    end
   end
   self.p.x, self.p.y = self.c:center()
 end

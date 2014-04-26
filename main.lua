@@ -17,12 +17,19 @@ function love.load()
   require "Physics"
   require "Player"
   require "Terrain"
-  t = Terrain(0, 500, love.graphics.getWidth(), love.graphics.getHeight())
+
+  t = {}
+  table.insert(t, Terrain(0, 500, love.graphics.getWidth(), love.graphics.getHeight()))
+  table.insert(t, Terrain(-10, 0, 20, love.graphics.getHeight() + 20))
+  table.insert(t, Terrain(love.graphics.getWidth()-10, 0, 20, love.graphics.getHeight() + 20))
+
   player = Player(10, 10)
 end
 
 function love.draw()
-  t:draw()
+  for i,v in ipairs(t) do
+    v:draw()
+  end
   love.graphics.setColor(255, 255, 255)
   player:draw()
 end
@@ -33,11 +40,12 @@ function love.update(dt)
 end
 
 function on_collision(dt, a, b, dx, dy)
-  print("COLLISION")
   if a == player.c then
+    player.canJump = true
     a:move(dx, dy)
   end
   if b == player.c then
+    player.canJump = true
     b:move(-dx, -dy)
   end
 end
