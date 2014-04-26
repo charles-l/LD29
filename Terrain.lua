@@ -8,7 +8,10 @@ function Terrain:initialize(x, y, w, h)
 end
 
 function Terrain:draw()
-  self.c:draw('line')
   love.graphics.setColor(153, 76, 52)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+  love.graphics.setColor(255, 255, 255)
+  if debug then
+    self.c:draw('line')
+  end
 end

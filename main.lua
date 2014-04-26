@@ -8,8 +8,9 @@ class = require "libs.middleclass.middleclass"
 require "libs.struct"
 require "libs.stateful.stateful"
 gui = require "libs.Quickie"
-debug = true
 anim8 = require "libs.anim8.anim8"
+
+debug = false
 
 function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -18,16 +19,19 @@ function love.load()
   require "Physics"
   require "Player"
   require "Terrain"
-
+  require "Cloud"
+  require "Worm"
   t = {}
   t.floor = Terrain(0, 500, love.graphics.getWidth(), love.graphics.getHeight())
   table.insert(t, Terrain(-10, 0, 20, love.graphics.getHeight() + 20))
   table.insert(t, Terrain(love.graphics.getWidth()-10, 0, 20, love.graphics.getHeight() + 20))
 
   player = Player(50, 300)
+  cc = CloudController(4)
 end
 
 function love.draw()
+  cc:draw()
   t.floor:draw()
   for i,v in ipairs(t) do
     v:draw()
@@ -39,6 +43,7 @@ end
 function love.update(dt)
   Collider:update(dt)
   player:update(dt)
+  cc:update(dt)
 end
 
 function on_collision(dt, a, b, dx, dy)
