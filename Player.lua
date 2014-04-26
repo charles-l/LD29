@@ -10,10 +10,16 @@ function Player:initialize(x, y)
     self.quads[i] = love.graphics.newQuad(i * 13, 0, 13, 19, self.sprite:getWidth(), self.sprite:getHeight())
   end
   self.canJump = true
+  self.jumpV = 0
 end
-
 function Player:update(dt)
   self:updateCol(dt)
+  self.c:move(0, -self.jumpV)
+  if not self.canJump then
+    if self.jumpV > 0 then
+      self.jumpV = self.jumpV - 1
+    end
+  end
   if love.keyboard.isDown("a") then
     self.c:move(-self.speed, 0)
   end
@@ -22,8 +28,7 @@ function Player:update(dt)
   end
   if love.keyboard.isDown("w") then
     if self.canJump then
-      print("jump!")
-      self.c:move(0, -30)
+      self.jumpV = 10
       self.canJump = false
     end
   end
