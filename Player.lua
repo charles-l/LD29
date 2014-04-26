@@ -19,8 +19,12 @@ function Player:initialize(x, y)
   self.jump = anim8.newAnimation(self.g('6-6', 1), 5)
   self.currentAnimation = self.idle
   self.right = true
+  self.health = 5
+  self.arrows = {}
+  self.firePower = 10
 end
 function Player:update(dt)
+  self.p.x, self.p.y = self.c:center()
   self.currentAnimation:update(dt)
   if self.onGround then
     self.jumpsLeft = 20
@@ -51,13 +55,22 @@ function Player:update(dt)
       self.jumpsLeft = self.jumpsLeft - 1
     end
   end
+  if love.mouse.isDown('l') then
+    if self.firePower < 40 then
+      self.firePower = self.firePower + 15 * dt
+    end
+  end
+
   if not self.onGround or (not self.onGround and (love.keyboard.isDown("a") or love.keyboard.isDown("d"))) then
     self.currentAnimation = self.jump
   end
-  self.p.x, self.p.y = self.c:center()
+  for i,v in ipairs(self.arrows) do
+    v:update(dt)
+  end
 end
-
 function Player:draw()
+  local x, y = self.c:center()
+
   if self.right then
     self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, 2, 2, 13/2, self.sprite:getHeight()/2)
   else
@@ -66,4 +79,30 @@ function Player:draw()
   if debug then
     self:debugDrawCol()
   end
+  for i,v in ipairs(self.arrows) do
+    v:draw()
+  end
+end
+function Player:fireArrow(power)
+  table.insert(self.arrows, Arrow(self, math.atan2(love.mouse.getY() - self.p.y, love.mouse.getX() - self.p.x), power))
+end
+function love.mousereleased(x, y, b)
+  if b == "l" then
+    player:fireArrow(player.firePower)
+  end
+end
+
+Arrow = class('Arrow')
+Arrow:include(DynCol)
+function Arrow:initialize(parent, angle, speed)
+  self.v = vector(math.cos(angle) * speed, math.sin(angle) * speed)
+  local x, y = parent.c:center()
+  self:createCol(x, y, 20, 1)
+  self.c:rotate(angle)
+end
+function Arrow:update(dt)
+  self.c:move(self.v.x, self.v.y)
+end
+function Arrow:draw()
+  self:debugDrawCol()
 end

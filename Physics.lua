@@ -11,7 +11,7 @@ DynCol = {
     self.c = Collider:addRectangle(self.p.x, self.p.y, self.w, self.h)
   end,
   applyGravity = function(self, dt)
-      self.c:move(0, (Physics.GRAVITY_Y))
+    self.c:move(0, Physics.GRAVITY_Y)
   end,
   debugDrawCol = function(self)
     self.c:draw('line')
