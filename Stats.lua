@@ -4,9 +4,10 @@ function Stats:initialize(player)
   self.player = player
   self.score = 0
   self.heartIcon = love.graphics.newImage('res/heart.png')
+  self.kills = 0
 end
 
-function Stats:score(score)
+function Stats:addScore(score)
   self.score = self.score + score
 end
 

@@ -11,7 +11,7 @@ Stateful = require "libs.stateful.stateful"
 gui = require "libs.Quickie"
 anim8 = require "libs.anim8.anim8"
 
-debug = false
+debug = true
 
 game = {}
 
@@ -25,6 +25,7 @@ function game:enter()
   require "Cloud"
   require "Worm"
   require "Stats"
+  require "Particles"
 
   t = {}
   t.floor = Terrain(0, 500, love.graphics.getWidth(), love.graphics.getHeight())
@@ -33,8 +34,10 @@ function game:enter()
 
   player = Player(50, 300)
   cc = CloudController(4)
-  w = Worm(40)
   stat = Stats(player)
+  ws = WormSpawner(2)
+  PS = PS()
+  PS:newSystem(love.graphics.newImage('res/bloodParticle.png'), 100)
 end
 
 function game:draw()
@@ -44,16 +47,19 @@ function game:draw()
     v:draw()
   end
   love.graphics.setColor(255, 255, 255)
-  w:draw()
   player:draw()
   stat:display()
+  ws:drawWorms()
+  PS:draw()
 end
 
 function game:update(dt)
+  timer.update(dt)
   Collider:update(dt)
+  ws:update(dt)
   player:update(dt)
   cc:update(dt)
-  w:update(dt)
+  PS:update(dt)
 end
 
 function on_collision(dt, a, b, dx, dy)

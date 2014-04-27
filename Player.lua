@@ -5,10 +5,6 @@ function Player:initialize(x, y)
   self:createCol(x, y, 26, 36)
   self.speed = 5
   self.sprite = love.graphics.newImage('res/ninja.png')
-  self.quads = {}
-  for i = 0, 6 do
-    self.quads[i] = love.graphics.newQuad(i * 13, 0, 13, 19, self.sprite:getWidth(), self.sprite:getHeight())
-  end
   self.onGround = false
   self.jumpsLeft = 20
   self.jumpV = 0
@@ -66,11 +62,12 @@ function Player:update(dt)
   end
   for i,v in ipairs(self.arrows) do
     v:update(dt)
+    if v.dead then
+      table.remove(self.arrows, v)
+    end
   end
 end
 function Player:draw()
-  local x, y = self.c:center()
-
   if self.right then
     self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, 2, 2, 13/2, self.sprite:getHeight()/2)
   else
@@ -86,22 +83,39 @@ end
 function Player:fireArrow(power)
   table.insert(self.arrows, Arrow(self, math.atan2(love.mouse.getY() - self.p.y, love.mouse.getX() - self.p.x), power))
 end
+
 function love.mousereleased(x, y, b)
   if b == "l" then
     player:fireArrow(player.firePower)
+    player.firePower = 10
   end
 end
 
 Arrow = class('Arrow')
 Arrow:include(DynCol)
-function Arrow:initialize(parent, angle, speed)
-  self.v = vector(math.cos(angle) * speed, math.sin(angle) * speed)
-  local x, y = parent.c:center()
+function Arrow:initialize(parent, angle, power)
+  self.v = vector(math.cos(angle) * power, math.sin(angle) * power)
+  self.power = power
+  self.parent = parent
+  local x, y = self.parent.c:center()
   self:createCol(x, y, 20, 1)
   self.c:rotate(angle)
+  self.c.data = self
+  self.dead = false
 end
 function Arrow:update(dt)
   self.c:move(self.v.x, self.v.y)
+  for i,v in ipairs(ws.worms) do
+    if self.c:collidesWith(v.c) then
+      stat.kills = stat.kills + 1
+      print(stat.kills)
+      Collider:remove(v.c)
+      v.dead = true
+      self.dead = true
+      Collider:remove(self.c)
+      stat:addScore(10)
+    end
+  end
 end
 function Arrow:draw()
   self:debugDrawCol()

@@ -2,10 +2,17 @@ Worm = class('Worm')
 Worm:include(DynCol)
 Worm:include(Stateful)
 
-function Worm:initialize(x)
-  self:createCol(x, love.graphics.getHeight() - 100, 20, 100)
+function Worm:initialize(x, leapDist)
+  self:createCol(x, love.graphics.getHeight() + 100, 20, 100)
   self.jumpV = 13
   self.speed = 4
+  self.leapDist = leapDist
+  self.sprite = love.graphics.newImage('res/worm.png')
+  self.g = anim8.newGrid(10, 40, self.sprite:getWidth(), self.sprite:getHeight())
+  self.move = anim8.newAnimation(self.g('1-2', 1), 0.5)
+  self.c.data = self
+  self.dead = false
+  self.timeLeft = timer.add(10, function() self.dead = true end)
 end
 function Worm:update(dt)
   self.c:move(0, -self.speed)
@@ -16,12 +23,13 @@ end
 
 local Leap = Worm:addState('Leap')
 function Leap:update(dt)
+  self.move:update(dt)
   self:applyGravity(dt)
   self.jumpV = self.jumpV - 1*dt
   if self.c:rotation() < math.pi then
     self.c:rotate(.01)
   end
-  self.c:move(self.jumpV/10, -self.jumpV)
+  self.c:move(self.leapDist, -self.jumpV)
   if self.c:collidesWith(t.floor.c) then
     self:gotoState('Burrow')
   end
@@ -29,9 +37,38 @@ end
 
 local Burrow = Worm:addState('Burrow')
 function Burrow:update(dt)
+  self.p.x, self.p.y = self.c:center()
   self.c:move(0, self.speed)
 end
 
 function Worm:draw()
-  self:debugDrawCol()
+  local x, y = self.c:center()
+  self.move:draw(self.sprite, x, y, self.c:rotation(), 2, 2, 5, self.sprite:getHeight()/2)
+  if debug then
+    self:debugDrawCol()
+  end
+end
+
+WormSpawner = class('WormSpawner')
+function WormSpawner:initialize(density)
+  self.worms = {}
+  self.density = density
+  self.timer = timer.addPeriodic(1, function()
+    table.insert(self.worms, Worm(math.random(10, love.graphics.getWidth() - 50), math.random(.5, 3)))
+  end)
+end
+
+function WormSpawner:update(dt)
+  for i,v in ipairs(self.worms) do
+    if v.dead then
+      table.remove(self.worms, i)
+    end
+    v:update(dt)
+  end
+end
+
+function WormSpawner:drawWorms()
+  for i,v in ipairs(self.worms) do
+    v:draw()
+  end
 end

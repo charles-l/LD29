@@ -40,9 +40,8 @@ function CloudController:update(dt)
   end
   for i,v in ipairs(self.clouds) do
     v:update(dt)
-    if(v.p.x > love.graphics.getWidth()) then
+    if(v.p.x > love.graphics.getWidth() + 100) then
       table.remove(self.clouds, i)
-      print(#self.clouds)
     end
   end
 end
