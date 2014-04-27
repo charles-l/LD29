@@ -1,5 +1,6 @@
 Player = class('Player')
 Player:include(DynCol)
+Player:include(Stateful)
 
 function Player:initialize(x, y)
   self:createCol(x, y, 26, 36)
@@ -18,8 +19,10 @@ function Player:initialize(x, y)
   self.health = 5
   self.arrows = {}
   self.firePower = 10
+  self.invincible = false
 end
 function Player:update(dt)
+  self.invincible = false
   self.p.x, self.p.y = self.c:center()
   self.currentAnimation:update(dt)
   if self.onGround then
@@ -63,7 +66,7 @@ function Player:update(dt)
   for i,v in ipairs(self.arrows) do
     v:update(dt)
     if v.dead then
-      table.remove(self.arrows, v)
+      table.remove(self.arrows, i)
     end
   end
 end
@@ -73,6 +76,23 @@ function Player:draw()
   else
     self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, -2, 2, 13/2, self.sprite:getHeight()/2)
   end
+  if debug then
+    self:debugDrawCol()
+  end
+  for i,v in ipairs(self.arrows) do
+    v:draw()
+  end
+end
+local Invincible = Player:addState('Invincible')
+function Invincible:draw()
+  self.invincible = true
+  love.graphics.setColor(225, 255, 255, 100)
+  if self.right then
+    self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, 2, 2, 13/2, self.sprite:getHeight()/2)
+  else
+    self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, -2, 2, 13/2, self.sprite:getHeight()/2)
+  end
+  love.graphics.setColor(225, 255, 255, 255)
   if debug then
     self:debugDrawCol()
   end
@@ -93,6 +113,7 @@ end
 
 Arrow = class('Arrow')
 Arrow:include(DynCol)
+Arrow.static.sprite = love.graphics.newImage('res/arrow.png')
 function Arrow:initialize(parent, angle, power)
   self.v = vector(math.cos(angle) * power, math.sin(angle) * power)
   self.power = power
@@ -108,15 +129,15 @@ function Arrow:update(dt)
   for i,v in ipairs(ws.worms) do
     if self.c:collidesWith(v.c) then
       stat.kills = stat.kills + 1
-      print(stat.kills)
-      Collider:remove(v.c)
       v.dead = true
-      self.dead = true
-      Collider:remove(self.c)
       stat:addScore(10)
     end
   end
 end
 function Arrow:draw()
-  self:debugDrawCol()
+  local x, y = self.c:center()
+  love.graphics.draw(Arrow.static.sprite, x, y, self.c:rotation(), -2, 2, Arrow.static.sprite:getWidth()/2, Arrow.static.sprite:getHeight()/2)
+  if debug then
+    self:debugDrawCol()
+  end
 end

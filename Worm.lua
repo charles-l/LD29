@@ -1,14 +1,13 @@
 Worm = class('Worm')
 Worm:include(DynCol)
 Worm:include(Stateful)
-
+Worm.static.sprite = love.graphics.newImage('res/worm.png')
 function Worm:initialize(x, leapDist)
   self:createCol(x, love.graphics.getHeight() + 100, 20, 100)
   self.jumpV = 13
   self.speed = 4
   self.leapDist = leapDist
-  self.sprite = love.graphics.newImage('res/worm.png')
-  self.g = anim8.newGrid(10, 40, self.sprite:getWidth(), self.sprite:getHeight())
+  self.g = anim8.newGrid(10, 40, Worm.static.sprite:getWidth(), Worm.static.sprite:getHeight())
   self.move = anim8.newAnimation(self.g('1-2', 1), 0.5)
   self.c.data = self
   self.dead = false
@@ -43,7 +42,7 @@ end
 
 function Worm:draw()
   local x, y = self.c:center()
-  self.move:draw(self.sprite, x, y, self.c:rotation(), 2, 2, 5, self.sprite:getHeight()/2)
+  self.move:draw(Worm.static.sprite, x, y, self.c:rotation(), 2, 2, 5, Worm.static.sprite:getHeight()/2)
   if debug then
     self:debugDrawCol()
   end
@@ -61,6 +60,7 @@ end
 function WormSpawner:update(dt)
   for i,v in ipairs(self.worms) do
     if v.dead then
+      print("DE")
       table.remove(self.worms, i)
     end
     v:update(dt)

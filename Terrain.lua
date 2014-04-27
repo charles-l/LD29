@@ -5,6 +5,7 @@ function Terrain:initialize(x, y, w, h)
   self.w = w
   self.h = h
   self.c = Collider:addRectangle(self.x, self.y, self.w, self.h)
+  self.c.data = self
 end
 
 function Terrain:draw()

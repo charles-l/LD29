@@ -11,14 +11,12 @@ Stateful = require "libs.stateful.stateful"
 gui = require "libs.Quickie"
 anim8 = require "libs.anim8.anim8"
 
-debug = true
+debug = false
 
 game = {}
-
-function game:enter()
-  love.graphics.setDefaultFilter('nearest', 'nearest')
-  Collider = HC(100, on_collision, collision_stop)
+function game:init()
   love.graphics.setBackgroundColor(135, 206, 235)
+  love.graphics.setDefaultFilter('nearest', 'nearest')
   require "Physics"
   require "Player"
   require "Terrain"
@@ -26,6 +24,9 @@ function game:enter()
   require "Worm"
   require "Stats"
   require "Particles"
+end
+function game:enter()
+  Collider = HC(100, on_collision, collision_stop)
 
   t = {}
   t.floor = Terrain(0, 500, love.graphics.getWidth(), love.graphics.getHeight())
@@ -36,7 +37,7 @@ function game:enter()
   cc = CloudController(4)
   stat = Stats(player)
   ws = WormSpawner(2)
-  PS = PS()
+  PS = PartSys()
   PS:newSystem(love.graphics.newImage('res/bloodParticle.png'), 100)
 end
 
@@ -60,30 +61,115 @@ function game:update(dt)
   player:update(dt)
   cc:update(dt)
   PS:update(dt)
+  if player.health < 1 then
+    gamestate.switch(dead)
+  end
+  if love.keyboard.isDown(' ') then
+    gamestate.switch(dead)
+  end
+end
+
+function game:leave()
+  Collider = nil
+  t = nil
+  player = nil
+  cc = nil
+  ws = nil
+  PS = nil
+end
+
+dead = {}
+function dead:enter()
+  self.menuTimer = timer.new()
+  self.showStats = false
+  self.showMessage = false
+  self.menuTimer:add(1, function() self.showMessage = true end)
+  self.menuTimer:add(2, function() self.showStats = true end)
+end
+
+function dead:draw()
+  if not self.showStats then
+    love.graphics.setFont(font[50])
+    love.graphics.print("You dead", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 1, 1, font[50]:getWidth("You dead")/2, font[50]:getHeight()/2)
+    if self.showMessage then
+      love.graphics.setFont(font[36])
+      love.graphics.print("But you still did good", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 40, 0, 1, 1, font[36]:getWidth("But you still did good")/2, font[36]:getHeight()/2)
+    end
+  else
+    love.graphics.print("Final Score", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 40, 0, 1, 1, font[36]:getWidth("Final Score")/2, font[36]:getHeight()/2)
+    love.graphics.print(stat.score, love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 1, 1, font[36]:getWidth(stat.score)/2, font[36]:getHeight()/2)
+    love.graphics.print("Kills", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 40, 0, 1, 1, font[36]:getWidth("Kills")/2, font[36]:getHeight()/2)
+    love.graphics.print(stat.kills, love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 80, 0, 1, 1, font[36]:getWidth(stat.kills)/2, font[36]:getHeight()/2)
+  end
+end
+
+function dead:update(dt)
+  self.menuTimer:update(dt)
+  if love.keyboard.isDown('r') then
+    gamestate.switch(game)
+  end
 end
 
 function on_collision(dt, a, b, dx, dy)
   if a == player.c then
-    if player.arrows[#player.arrows] ~= nil then
-      if b == player.arrows[#player.arrows].c then
-        return
+    if b["data"] ~= nil then
+      if b.data:isInstanceOf(Terrain) then
+        a:move(dx, dy)
       end
     end
-    a:move(dx, dy)
   end
   if b == player.c then
-    if player.arrows[#player.arrows] ~= nil then
-      if a == player.arrows[#player.arrows].c then
-        return
+    if a["data"] ~= nil then
+      if a.data:isInstanceOf(Terrain) then
+        b:move(-dx, -dy)
       end
     end
-    b:move(-dx, -dy)
   end
+
+  if a == player.c then
+    if b["data"] ~= nil then
+      if b.data:isInstanceOf(Worm) and b.data.dead == false then
+        if not player.invincible then
+          player.health = player.health - 1
+          player:gotoState('Invincible')
+          timer.do_for(3, function()player:gotoState('Invincible')end, function()player:gotoState(nil)end)
+        end
+        b.data.dead = true
+      end
+    end
+  end
+
+  if b == player.c then
+    if a["data"] ~= nil then
+      if a.data:isInstanceOf(Worm) and a.data.dead == false then
+        if not player.invincible then
+          player.health = player.health - 1
+          timer.do_for(3, function()player:gotoState('Invincible')end, function()player:gotoState(nil)end)
+        end
+        a.data.dead = true
+      end
+    end
+  end
+
   if a == player.c and b == t.floor.c then
     player.onGround = true
   end
   if b == player.c and a == t.floor.c then
     player.onGround = true
+  end
+  if a["data"] ~= nil and b["data"] ~= nil then
+    if a.data:isInstanceOf(Arrow) then
+      if b.data:isInstanceOf(Terrain) then
+        a.data.dead = true
+      end
+    end
+  end
+  if b["data"] ~= nil and a["data"] ~= nil then
+    if b.data:isInstanceOf(Arrow) then
+      if a.data:isInstanceOf(Terrain) then
+        b.data.dead = true
+      end
+    end
   end
 end
 function collision_stop(dt, a, b)
