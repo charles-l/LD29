@@ -54,7 +54,6 @@ function game:enter()
   stat = Stats(player)
   ws = WormSpawner(1)
   PS = PartSys()
-  PS:newSystem(love.graphics.newImage('res/bloodParticle.png'), 100)
 end
 
 function game:draw()
@@ -64,10 +63,10 @@ function game:draw()
     v:draw()
   end
   love.graphics.setColor(255, 255, 255)
-  player:draw()
-  stat:display()
-  ws:drawWorms()
   PS:draw()
+  player:draw()
+  ws:drawWorms()
+  stat:display()
 end
 
 function game:update(dt)
@@ -113,6 +112,7 @@ function dead:draw()
     love.graphics.print(stat.score, love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 1, 1, font[36]:getWidth(stat.score)/2, font[36]:getHeight()/2)
     love.graphics.print("Kills", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 40, 0, 1, 1, font[36]:getWidth("Kills")/2, font[36]:getHeight()/2)
     love.graphics.print(stat.kills, love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 80, 0, 1, 1, font[36]:getWidth(stat.kills)/2, font[36]:getHeight()/2)
+    love.graphics.print("Press R to restart", love.graphics.getWidth()/2, love.graphics.getHeight() - 100, 0, 1, 1, font[36]:getWidth("Press R to restart")/2, font[36]:getHeight()/2)
   end
 end
 

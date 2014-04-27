@@ -3,7 +3,7 @@ Worm:include(DynCol)
 Worm:include(Stateful)
 Worm.static.sprite = love.graphics.newImage('res/worm.png')
 function Worm:initialize(x, leapDist)
-  self:createCol(x, love.graphics.getHeight() + 100, 20, 100)
+  self:createCol(x, love.graphics.getHeight() + math.random(100, 200), 20, 100)
   self.jumpV = 13
   self.speed = 4
   self.leapDist = leapDist
