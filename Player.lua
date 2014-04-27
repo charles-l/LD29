@@ -70,6 +70,14 @@ function Player:update(dt)
     end
   end
 end
+function love.keypressed(k)
+  if k == 'w' then
+    if player.onGround or player.jumpsLeft > 0 then
+      love.audio.rewind(sfx.jump)
+      love.audio.play(sfx.jump)
+    end
+  end
+end
 function Player:draw()
   if self.right then
     self.currentAnimation:draw(self.sprite, self.p.x, self.p.y, 0, 2, 2, 13/2, self.sprite:getHeight()/2)
@@ -123,14 +131,22 @@ function Arrow:initialize(parent, angle, power)
   self.c:rotate(angle)
   self.c.data = self
   self.dead = false
+  sfx.shoot:rewind()
+  sfx.shoot:play()
 end
 function Arrow:update(dt)
   self.c:move(self.v.x, self.v.y)
   for i,v in ipairs(ws.worms) do
     if self.c:collidesWith(v.c) then
-      stat.kills = stat.kills + 1
-      v.dead = true
-      stat:addScore(10)
+      if not v.dead then
+        sfx.hit:rewind()
+        sfx.hit:play()
+        sfx.death:rewind()
+        sfx.death:play()
+        stat.kills = stat.kills + 1
+        v.dead = true
+        stat:addScore(10)
+      end
     end
   end
 end

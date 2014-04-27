@@ -24,6 +24,15 @@ function game:init()
   require "Worm"
   require "Stats"
   require "Particles"
+  sfx = {}
+  sfx.jump = love.audio.newSource('res/jump.wav', 'static')
+  sfx.jump:setVolume(.3)
+  sfx.hit = love.audio.newSource('res/hit.wav', 'static')
+  sfx.hit:setVolume(.3)
+  sfx.shoot = love.audio.newSource('res/shoot.wav', 'static')
+  sfx.shoot:setVolume(.3)
+  sfx.death = love.audio.newSource('res/death.wav', 'static')
+  sfx.death:setVolume(.3)
 end
 function game:enter()
   Collider = HC(100, on_collision, collision_stop)
@@ -130,6 +139,8 @@ function on_collision(dt, a, b, dx, dy)
     if b["data"] ~= nil then
       if b.data:isInstanceOf(Worm) and b.data.dead == false then
         if not player.invincible then
+        sfx.hit:rewind()
+        sfx.hit:play()
           player.health = player.health - 1
           player:gotoState('Invincible')
           timer.do_for(3, function()player:gotoState('Invincible')end, function()player:gotoState(nil)end)
@@ -143,6 +154,8 @@ function on_collision(dt, a, b, dx, dy)
     if a["data"] ~= nil then
       if a.data:isInstanceOf(Worm) and a.data.dead == false then
         if not player.invincible then
+        sfx.hit:rewind()
+        sfx.hit:play()
           player.health = player.health - 1
           timer.do_for(3, function()player:gotoState('Invincible')end, function()player:gotoState(nil)end)
         end
@@ -160,14 +173,22 @@ function on_collision(dt, a, b, dx, dy)
   if a["data"] ~= nil and b["data"] ~= nil then
     if a.data:isInstanceOf(Arrow) then
       if b.data:isInstanceOf(Terrain) then
-        a.data.dead = true
+        if not a.data.dead then
+          sfx.hit:rewind()
+          sfx.hit:play()
+          a.data.dead = true
+        end
       end
     end
   end
   if b["data"] ~= nil and a["data"] ~= nil then
     if b.data:isInstanceOf(Arrow) then
       if a.data:isInstanceOf(Terrain) then
-        b.data.dead = true
+        if not b.data.dead then
+          sfx.hit:rewind()
+          sfx.hit:play()
+          b.data.dead = true
+        end
       end
     end
   end
