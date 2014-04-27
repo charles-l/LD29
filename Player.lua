@@ -113,9 +113,11 @@ function Player:fireArrow(power)
 end
 
 function love.mousereleased(x, y, b)
-  if b == "l" then
-    player:fireArrow(player.firePower)
-    player.firePower = 10
+  if gamestate.current() == game then
+    if b == "l" then
+      player:fireArrow(player.firePower)
+      player.firePower = 10
+    end
   end
 end
 

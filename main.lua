@@ -13,10 +13,26 @@ anim8 = require "libs.anim8.anim8"
 
 debug = false
 
+menu = {}
+
+function menu:enter()
+
+end
+
+function menu:draw()
+  love.graphics.print("NINJAS VS WORMS", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 2, 2, font[36]:getWidth("NINJAS vs WORMS")/2, font[36]:getHeight()/2)
+  love.graphics.print("Press Space to start", love.graphics.getWidth()/2, love.graphics.getHeight() - 100, 0, 1, 1, font[36]:getWidth("Press Space to start")/2, font[36]:getHeight()/2)
+end
+
+function menu:update(dt)
+  if love.keyboard.isDown(' ') then
+    gamestate.switch(game)
+  end
+end
+
 game = {}
 function game:init()
   love.graphics.setBackgroundColor(135, 206, 235)
-  love.graphics.setDefaultFilter('nearest', 'nearest')
   require "Physics"
   require "Player"
   require "Terrain"
@@ -24,15 +40,6 @@ function game:init()
   require "Worm"
   require "Stats"
   require "Particles"
-  sfx = {}
-  sfx.jump = love.audio.newSource('res/jump.wav', 'static')
-  sfx.jump:setVolume(.3)
-  sfx.hit = love.audio.newSource('res/hit.wav', 'static')
-  sfx.hit:setVolume(.3)
-  sfx.shoot = love.audio.newSource('res/shoot.wav', 'static')
-  sfx.shoot:setVolume(.3)
-  sfx.death = love.audio.newSource('res/death.wav', 'static')
-  sfx.death:setVolume(.3)
 end
 function game:enter()
   Collider = HC(100, on_collision, collision_stop)
@@ -71,9 +78,6 @@ function game:update(dt)
   cc:update(dt)
   PS:update(dt)
   if player.health < 1 then
-    gamestate.switch(dead)
-  end
-  if love.keyboard.isDown(' ') then
     gamestate.switch(dead)
   end
 end
@@ -199,14 +203,27 @@ function collision_stop(dt, a, b)
   end
 end
 function love.load()
+  love.graphics.setDefaultFilter('nearest', 'nearest')
   font = {}
   font[12] = love.graphics.newFont('res/BMgermar.TTF', 12)
   font[25] = love.graphics.newFont('res/BMgermar.TTF', 25)
   font[36] = love.graphics.newFont('res/BMgermar.TTF', 36)
   font[50] = love.graphics.newFont('res/BMgermar.TTF', 50)
+  sfx = {}
+  sfx.jump = love.audio.newSource('res/jump.wav', 'static')
+  sfx.jump:setVolume(.3)
+  sfx.hit = love.audio.newSource('res/hit.wav', 'static')
+  sfx.hit:setVolume(.3)
+  sfx.shoot = love.audio.newSource('res/shoot.wav', 'static')
+  sfx.shoot:setVolume(.3)
+  sfx.death = love.audio.newSource('res/death.wav', 'static')
+  sfx.death:setVolume(.3)
   love.graphics.setFont(font[36])
+  music = love.audio.newSource('res/music.mp3', 'stream')
+  music:setLooping(true)
+  music:play()
   gamestate.registerEvents()
-  gamestate.switch(game)
+  gamestate.switch(menu)
 end
 function drawDropShadow(imgOrString, x, y, sDist, color, r, sx)
   love.graphics.setColor(0, 0, 0, 100)
