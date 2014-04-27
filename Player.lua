@@ -22,6 +22,10 @@ function Player:initialize(x, y)
   self.invincible = false
 end
 function Player:update(dt)
+  if #player.arrows > 40 then
+    Collider:remove(player.arrows[1].c)
+    player.arrows[1].dead = true
+  end
   self.invincible = false
   self.p.x, self.p.y = self.c:center()
   self.currentAnimation:update(dt)

@@ -26,7 +26,7 @@ function Leap:update(dt)
   self:applyGravity(dt)
   self.jumpV = self.jumpV - 1*dt
   if self.c:rotation() < math.pi then
-    self.c:rotate(.01)
+    self.c:rotate(self.leapDist/300)
   end
   self.c:move(self.leapDist, -self.jumpV)
   if self.c:collidesWith(t.floor.c) then
@@ -53,14 +53,18 @@ function WormSpawner:initialize(density)
   self.worms = {}
   self.density = density
   self.timer = timer.addPeriodic(1, function()
-    table.insert(self.worms, Worm(math.random(10, love.graphics.getWidth() - 50), math.random(.5, 3)))
+    for i=0, self.density do
+      table.insert(self.worms, Worm(math.random(10, love.graphics.getWidth() - 50), math.random(-3, 3)))
+    end
+  end)
+  self.densityTimer = timer.addPeriodic(10, function()
+    self.density = self.density + 1
   end)
 end
 
 function WormSpawner:update(dt)
   for i,v in ipairs(self.worms) do
     if v.dead then
-      print("DE")
       table.remove(self.worms, i)
     end
     v:update(dt)

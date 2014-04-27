@@ -52,7 +52,7 @@ function game:enter()
   player = Player(50, 300)
   cc = CloudController(4)
   stat = Stats(player)
-  ws = WormSpawner(2)
+  ws = WormSpawner(1)
   PS = PartSys()
   PS:newSystem(love.graphics.newImage('res/bloodParticle.png'), 100)
 end
