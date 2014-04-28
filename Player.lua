@@ -22,10 +22,6 @@ function Player:initialize(x, y)
   self.invincible = false
 end
 function Player:update(dt)
-  if #player.arrows > 40 then
-    Collider:remove(player.arrows[1].c)
-    player.arrows[1].dead = true
-  end
   self.invincible = false
   self.p.x, self.p.y = self.c:center()
   self.currentAnimation:update(dt)
@@ -72,6 +68,11 @@ function Player:update(dt)
     if v.dead then
       table.remove(self.arrows, i)
     end
+  end
+  if #player.arrows > 30 then
+    print(#player.arrows)
+    Collider:remove(player.arrows[1].c)
+    player.arrows[1].dead = true
   end
 end
 function Player:draw()
