@@ -85,6 +85,14 @@ function game:update(dt)
   player:update(dt)
   cc:update(dt)
   PS:update(dt)
+  -- MAJOR HACK TO MAKE IT CLEAN UP SHAPES!
+  for i,v in Collider:activeShapes() do
+    if v["data"] ~= nil then
+      if v.data.dead then
+        Collider:remove(v)
+      end
+    end
+  end
   if player.health < 1 then
     gamestate.switch(dead)
   end
