@@ -1,30 +1,39 @@
 -- GLOBALS
 math.randomseed(os.time())
-HC = require "libs.hardoncollider"
-timer = require "libs.hump.timer"
-camera = require "libs.hump.camera"
-gamestate = require "libs.hump.gamestate"
-vector = require "libs.hump.vector"
-class = require "libs.middleclass.middleclass"
-require "libs.struct"
-Stateful = require "libs.stateful.stateful"
-gui = require "libs.Quickie"
-anim8 = require "libs.anim8.anim8"
 
 debug = false
 
 menu = {}
 
 function menu:enter()
-
+  self.logo = {}
+  self.logo.sprite = love.graphics.newImage('res/logo.png')
+  self.logo.p = vector(love.graphics.getWidth()/2, -100)
+  self.logo.timer = timer.new()
+  self.logo.timer:tween(1.6, self.logo.p, {x = x, y = love.graphics.getHeight()/2}, 'in-bounce')
+  self.help = {}
+  self.help.x = 2000
+  self.help.images = {love.graphics.newImage('res/help0.png'), love.graphics.newImage('res/help1.png')}
+  self.logo.timer:add(3, function()
+    self.logo.timer:tween(1, self.logo.p, {x = x, y = -100}, 'in-back')
+  end)
+  self.logo.timer:add(4, function()
+    self.logo.timer:tween(1.6, self.help, {x = love.graphics.getWidth()/2}, 'in-out-quad')
+  end)
+  self.logo.timer:add(8, function()
+    self.logo.timer:tween(1.6, self.help, {x = love.graphics.getWidth()/2 - self.help.images[1]:getWidth() - 300}, 'in-out-quad')
+  end)
 end
 
 function menu:draw()
-  love.graphics.print("NINJAS VS WORMS", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 2, 2, font[36]:getWidth("NINJAS vs WORMS")/2, font[36]:getHeight()/2)
+  love.graphics.draw(self.help.images[1], self.help.x, love.graphics.getHeight()/2, 0, 1, 1, self.help.images[1]:getWidth()/2, self.help.images[1]:getHeight()/2)
+  love.graphics.draw(self.help.images[2], self.help.x + 800, love.graphics.getHeight()/2, 0, 1, 1, self.help.images[2]:getWidth()/2, self.help.images[2]:getHeight()/2)
+  love.graphics.draw(self.logo.sprite, self.logo.p.x, self.logo.p.y, 0, 1, 1, self.logo.sprite:getWidth()/2, self.logo.sprite:getHeight()/2)
   love.graphics.print("Press Space to start", love.graphics.getWidth()/2, love.graphics.getHeight() - 100, 0, 1, 1, font[36]:getWidth("Press Space to start")/2, font[36]:getHeight()/2)
 end
 
 function menu:update(dt)
+  self.logo.timer:update(dt)
   if love.keyboard.isDown(' ') then
     gamestate.switch(game)
   end
@@ -100,6 +109,7 @@ function dead:enter()
 end
 
 function dead:draw()
+  love.graphics.setColor(255, 255, 255)
   if not self.showStats then
     love.graphics.setFont(font[50])
     love.graphics.print("You dead", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 0, 1, 1, font[50]:getWidth("You dead")/2, font[50]:getHeight()/2)
@@ -203,6 +213,17 @@ function collision_stop(dt, a, b)
   end
 end
 function love.load()
+  HC = require "libs.HardonCollider"
+  timer = require "libs.hump.timer"
+  camera = require "libs.hump.camera"
+  gamestate = require "libs.hump.gamestate"
+  vector = require "libs.hump.vector"
+  class = require "libs.middleclass.middleclass"
+  require "libs.struct"
+  Stateful = require "libs.stateful.stateful"
+  gui = require "libs.Quickie"
+  anim8 = require "libs.anim8.anim8"
+
   love.graphics.setDefaultFilter('nearest', 'nearest')
   font = {}
   font[12] = love.graphics.newFont('res/BMgermar.TTF', 12)

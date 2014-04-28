@@ -14,8 +14,10 @@ function Worm:initialize(x, leapDist)
   self.timeLeft = timer.add(10, function() self.dead = true end)
 end
 function Worm:update(dt)
+  self.p.x, self.p.y = self.c:center()
   self.c:move(0, -self.speed)
   if not self.c:collidesWith(t.floor.c) then
+    PS:dirt(self.p.x, self.p.y + 50)
     self:gotoState('Leap')
   end
 end
